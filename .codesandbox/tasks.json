@@ -1,0 +1,37 @@
+{
+  // These tasks will run in order when initializing your CodeSandbox project.
+  "setupTasks": [
+    {
+      "name": "Install Dependencies",
+      "command": "yarn install"
+    }
+  ],
+
+  // These tasks can be run from CodeSandbox. Running one will open a log in the app.
+  "tasks": {
+    "start": {
+      "name": "start",
+      "command": "yarn start",
+      "runAtStart": true,
+      "preview": {
+        "port": 3000
+      }
+    },
+    "npm install express": {
+      "name": "express",
+      "command": "npm install express"
+    },
+    "npm install socket.io": {
+      "name": "socket.io",
+      "command": "npm install socket.io"
+    },
+    "node --trace-warnings": {
+      "name": "node --trace-warnings",
+      "command": "node --trace-warnings"
+    },
+    "preview: 2000": {
+      "name": "preview: 2000",
+      "command": "preview: 2000"
+    }
+  }
+}

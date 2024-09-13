@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <!--Welcome to the code of ChatApp. This is fully coded by Abrar Shafi. Feel free to use this code for your projects without crediting me. In this code, you will also find notes telling how the code works.-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!--Import Boostrap-->
+    <title>ChatApp</title>
+    <!--Set the title to "ChatApp"-->
+    <style>
+        #bottom {
+
+            width: 100%;
+            position: fixed;
+            bottom: 0;
+            background-color: gray;
+        }
+
+        input {
+            width: 20vh;
+        }
+
+        button {
+            width: 20vh;
+        }
+
+        #input {
+            height: 40px;
+            width: 50%;
+            width: 80%;
+        }
+
+        #left {
+            float: left;
+            background-color: black;
+            height: 100vh;
+            width: 20%;
+            position:fixed;
+        }
+
+        #chatBtn {
+            height: 40px;
+            float: right;
+            width: 20%;
+        }
+
+        #messages {
+            float: right;
+            width: 80%;
+            padding-bottom: 40px;
+        }
+
+        p {
+            color: white;
+        }
+    </style>
+    <!--Style all of the elements based on there ids.-->
+</head>
+
+<body>
+
+    <div id="messages"></div>
+    <!--Create the messages div. All of the messages go here.-->
+    <div id="left">
+      <!--Create the side panel for entering your room and your name-->
+        <p id="usernamedisplay">[Enter a name] </p>
+        <!--Your name goes here-->
+        <p id="room"> main room </p>
+        <!--Your room goes here-->
+        <input id="roomInput" placeholder="Enter your room.." autocomplete="off" />
+        <!--The input box for the room. Placeholder of "Enter your room.."-->
+        <button id="roomSet" type="button" class="btn btn-primary"> Set Room</button>
+        <!--The button for conforming your room-->
+        <input id="usernameInput" placeholder="Enter your username.." autocomplete="off" />
+        <!--The input box for the username. Placeholder of "Enter your username.."-->
+        <button id="button1" type="button" class="btn btn-primary">Set Username</button>
+        <!--The button for conforming your username-->
+    </div>
+
+
+    <div id="bottom">
+      <!--The chat box goes on the bottom-->
+        <div id="chat">
+          <!--The chat box-->
+            <form id="form" action="">
+              <!--Form for inputing your message-->
+                <input id="input" autocomplete="off" placeholder="Enter your message.." /><button type="button" class="btn btn-primary" id="chatBtn">Send</button>
+                <!--The input box and button for inputting a message.-->
+            </form>
+        </div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <!--Import socket.io, the framework for making the messages get sent between clients.-->
+    <script>
+        const socket = io();
+        //Import socket.io
+
+        const form = document.getElementById('form');
+        const input = document.getElementById('input');
+        const messages = document.getElementById('messages');
+        let usernameInput = document.getElementById('usernameInput');
+        let usernameButton = document.getElementById('button1');
+        let roomButton = document.getElementById('roomSet');
+        let roomInput = document.getElementById('roomInput');
+        let username;
+        let room = document.getElementById('room');
+        let usernamedisplay = document.getElementById('usernamedisplay');
+        let chosenRoom = "main room";
+        let chatbtn = document.getElementById('chatBtn');
+        //Create all of the variables. Also import all of the HTML elements to edit.
+
+
+        usernameButton.addEventListener('click', () => {
+            username = usernameInput.value;
+            //Set the username to the input.
+            usernameInput.value = '';
+            //Make the input box blank again.
+            usernamedisplay.innerHTML = username;
+            //Change the username display on the sidebar.
+            
+        });
+        //Check if username button has been clicked.
+        roomButton.addEventListener('click', () => {
+            chosenRoom = roomInput.value;
+            //Set the room to the input.
+            room.innerHTML = chosenRoom;
+            //Change the value on the sidebar
+            roomInput.value = '';
+            //Empty the input box
+            messages.innerHTML = "";
+        });
+        chatBtn.addEventListener('click', () => {
+            if (username !== undefined) {
+              //Check if the username is NOT undefined.
+                if (input.value) {
+                    socket.emit("chat message", input.value, chosenRoom, username);
+
+                    input.value = '';
+                }
+            } else {
+              //If it is undefined, send a message to the user to set a username.
+                const item = document.createElement('div');
+                item.setAttribute("class", "alert alert-primary");
+                item.setAttribute("id", "youMsg");
+                item.textContent = "[Server] Message not broadcasted. Please set a username first";
+                messages.appendChild(item);
+                window.scrollTo(0, document.body.scrollHeight);
+                input.value = '';
+                //Send the message
+            }
+        });
+        //Handle sending messages
+
+        roomInput.addEventListener('keypress', (e) => {
+            if (e.keyCode == 13) {
+                roomButton.click();
+            }
+        });
+        //If enter key is pressed, click roombutton.
+        usernameInput.addEventListener('keypress', (e) => {
+            if (e.keyCode == 13) {
+                usernameButton.click();
+            }
+        });
+        //If enter key is pressed, click usernameinput
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (username !== undefined) {
+                if (input.value) {
+                    socket.emit("chat message", input.value, chosenRoom, username);
+
+                    input.value = '';
+                }
+            } else {
+                const item = document.createElement('div');
+                item.setAttribute("class", "alert alert-primary");
+                item.setAttribute("id", "youMsg");
+                item.textContent = "[Server] Message not broadcasted. Please set a username first";
+                messages.appendChild(item);
+                window.scrollTo(0, document.body.scrollHeight);
+                input.value = '';
+            }
+        });
+        //Handle sending messages.
+
+
+
+
+        socket.on("chat message", (msg, roomName, username1) => {
+            if (chosenRoom == roomName) {
+                if (username1 == username) {
+                    console.log(chosenRoom);
+                    const item = document.createElement('div');
+                    item.setAttribute("class", "alert alert-danger");
+                    item.setAttribute("id", "meMsg");
+                    item.textContent = "[" + "You" + "]" + " " + msg;
+                    messages.appendChild(item);
+                    window.scrollTo(0, document.body.scrollHeight);
+                } else {
+                    console.log(chosenRoom);
+                    const item = document.createElement('div');
+                    item.setAttribute("class", "alert alert-primary");
+                    item.setAttribute("id", "youMsg");
+                    item.textContent = "[" + username1 + "]" + " " + msg;
+                    messages.appendChild(item);
+                    window.scrollTo(0, document.body.scrollHeight);
+                }
+            } else {
+                console.log("N/A");
+            }
+        });
+        //Handle displaying messages.
+    </script>
+</body>
+
+</html>
